@@ -1,0 +1,19 @@
+{
+    "name": "bframe/framework",
+    "description": "The Bayscope PHP frame work",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Bframe\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "sirabdull",
+            "email": "sirabdull70@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
