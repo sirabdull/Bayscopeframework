@@ -37,13 +37,19 @@ class Router {
              {
                 [$controller] = $attributes;
               
-       
+                $found = false;
+
                 if ($path == $url)
                     {
                         self::run($controller);
-                        return true;
+                        $found  = true;
                     }
             }
+
+            if(!$found){
+
+                    self::notFound();
+              }
 
          }
          else{
@@ -59,10 +65,10 @@ class Router {
         
          if(is_callable($controller))
           {
-            $controller =  $controller();
-            echo $controller;
+            call_user_func($controller);
           }
-         else {
+
+         else if(is_string($controller)) {
              echo $controller;
          }
 
@@ -77,6 +83,18 @@ class Router {
     return self::class;
    }
 
+   public static function post($path,$callback)
+   
+   {
+    self::$routes['POST'][$path] = [$callback];
+    return self::class;
+   }
 
+
+   public  static function notFound()
+   {
+      die('404  Requested ROUTE NOT FOUND ON THIS SERVER');
+      
+   }
 
 }
