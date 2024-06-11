@@ -1,6 +1,8 @@
 <?php 
 
 namespace Bframe\Routing;
+use Bframe\HTTP\Request ;
+use App\Middleware\HelloMidleware;
 
 class Router {
 
@@ -50,9 +52,10 @@ class Router {
     
             foreach ($methodArray as $path => $attributes)
             {
-                [$controller] = $attributes;
+                [$controller, $middleware] = $attributes;
                 $found = false;
-    
+                
+                
                 // Convert route pattern to a regular expression
                 $pattern = preg_replace('#\{[\w]+\}#', '([^/]+)', $path);
                 $pattern = "#^" . $pattern . "$#";
@@ -61,7 +64,7 @@ class Router {
                 if (preg_match($pattern, $url, $matches))
                 {
                     array_shift($matches); // Remove the full match from the beginning
-                    self::run($controller, $matches); // Pass the matches as parameters
+                    self::run($controller, $matches, $middleware); // Pass the matches as parameters
                     $found = true;
                     break; // Exit the loop after finding a match
                 }
@@ -81,28 +84,49 @@ class Router {
   
   
   // Modify the run method to accept parameters
-  private static function run($controller, $params = []) 
+  private static function run($controller, $params = [], $middleware) 
   {
+     if(is_array($middleware) && count($middleware) > 0)
+     {
+
+        $request = new Request();
+
+        foreach($middleware as $m){
+        
+            if(class_exists($m)){
+              $middlewareReturn =  $m::handle($request);
+
+              if($middlewareReturn !== true){
+               return ;
+              }
+
+            }
+            else{
+               throw new \Exception($m .' is not a valid middleware');
+            }
+        }
+     }
+
       if(is_callable($controller))
       {
-          echo call_user_func_array($controller, $params);
+       call_user_func_array($controller, $params);
       }
       else if(is_string($controller)) {
           echo $controller;
       }
   }
 
-   public static function get($path,$callback)
+   public static function get($path,$callback, $middleware = [])
    
    {
-    self::$routes['GET'][$path] = [$callback];
+    self::$routes['GET'][$path] = [$callback, $middleware];
     return self::class;
    }
 
-   public static function post($path,$callback)
+   public static function post($path,$callback, $middleware = [])
    
    {
-    self::$routes['POST'][$path] = [$callback];
+    self::$routes['POST'][$path] = [$callback, $middleware];
     return self::class;
    }
 
@@ -112,5 +136,8 @@ class Router {
       die('404  Requested ROUTE NOT FOUND ON THIS SERVER');
       
    }
+
+  
+
 
 }

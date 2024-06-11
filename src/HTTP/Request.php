@@ -5,19 +5,31 @@ class Request
 
 {
 
-    public   $method ;
-    public  $uri ;
+    public  static  $method ;
+    public  static $uri ;
+
+    public  array $header;
+
+    public static $cookie = [];
+
 
     public  static $baseurl ;
     public function __construct( )
     {
-        $this->method = $_SERVER['REQUEST_METHOD'] ;
-        $this->uri = $_SERVER['REQUEST_URI'] ;
+        static::$method = $_SERVER['REQUEST_METHOD'] ;
+       static::$uri = $_SERVER['REQUEST_URI'] ;
 
-        foreach($this->all() as $key => $value){
-            $this->$key = $value;
+        foreach(self::all() as $key => $value){
+           $this->$key = $value;
         }
+
     }
+
+
+
+    public static function capture() {
+     
+    } 
 
     public  function method(){
         return $this->method;
@@ -32,13 +44,16 @@ class Request
     }
 
    
-    public function all() : array
+    public  function all() : array
     {
-      return $this->method == 'POST'  ? $_POST : $_GET;
+      return self::$method == 'POST'  ? $_POST : $_GET;
     }
 
 
-
+   public function header($header) 
+    {
+        return $_SERVER[$header];
+    }
      
 
 
